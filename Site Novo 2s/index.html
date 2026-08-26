@@ -1,20 +1,600 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Site institucional da Delícias Gourmet com cardápio, história, localização e contato."
+    />
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delicias Gourmet</title>
-    
-</head>
-<body>
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <title>Delícias Gourmet</title>
+  </head>
 
+  <body>
+    <header class="header">
+      <a href="#inicio" class="logo" title="Página inicial">
+        <img
+          src="./img/logo-delicias-gourmet.png"
+          alt="Logo Delícias Gourmet"
+        />
+      </a>
 
+      <div class="navigation-menu">
+        <input type="checkbox" name="menu" id="menu" hidden />
 
+        <label for="menu" class="menu-button">
+          <img
+            src="./img/menu-hamburguer.svg"
+            alt="Abrir menu"
+            class="menu-hamburguer"
+          />
+        </label>
+        <nav class="nav-menu" aria-label="Menu de navegação">
+          <ul class="list-links">
+            <li>
+              <a href="#inicio" title="Acessar início">Início</a>
+            </li>
+            <li>
+              <a href="#cardapio" title="Acessar cardápio">Cardápio</a>
+            </li>
+            <li>
+              <a href="#sobre" title="Acessar sobre a empresa">Sobre Nós</a>
+            </li>
+            <li>
+              <a href="#contato" title="Acessar contato">Contato</a>
+            </li>
+            <li>
+              <a
+                href="https://wa.me/554598352808"
+                class="btn-whatsapp"
+                title="Entrar em contato pelo WhatsApp"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src="./img/icon-whatsapp-svg-wine.svg"
+                  alt=""
+                  class="icon-whatsapp"
+                />
+                WhatsApp
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
+    <main>
+      <section id="inicio">
+        <img
+          src="img/cardapio/herofrente.png"
+          class="herofrente"
+          alt="Delicias Gourmet: sabor, qualidade e carinho em cada detalhe."
+        />
+        <div class="heroimg">
+          <img src="img/cardapio/hero1.png" alt="" />
+          <img src="img/cardapio/hero2.jpeg" alt="" />
+          <img src="img/cardapio/hero3.png" alt="" />
+        </div>
+      </section>
 
+      <div class="titulodiv">
+        <img class="detalhe1" src="img/detalhes.png" alt="" />
+        <h1 class="titulocardapio">Cardápio</h1>
+        <img class="detalhe2" src="img/detalhes.png" alt="" />
+      </div>
 
+      <section id="cardapio" class="cardapio">
+        <div class="titulosalgado">
+          <h2>Salgados</h2>
+        </div>
 
-    
-</body>
+        <div class="divsshawarma">
+          <div class="card">
+            <img
+              src="img/cardapio/shawarma1.png"
+              alt="Shawarma de Carne"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Shawarma de Carne</h3>
+            <p>R$ 27</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/shawarma2.png"
+              alt="Shawarma de Frango"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Shawarma de Frango</h3>
+            <p>R$ 24</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/shawarma3.png"
+              alt="Shawarma Misto"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Shawarma Misto</h3>
+            <p>R$ 27</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/shawarma4.png"
+              alt="Shawarma vegetariano"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Shawarma Vegetariano</h3>
+            <p>R$ 22</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+        </div>
+        <div class="divsshawarma">
+          <div class="card">
+            <img
+              src="img/cardapio/pasteu.png"
+              alt="Pastel"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Pastéis</h3>
+            <p>R$ 8</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/misto.png"
+              alt="Misto quente"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Misto Quente</h3>
+            <p>R$ 6</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/minipizza.png"
+              alt="Mini Pizza"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Mini Pizzas</h3>
+            <p>R$ 6</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/cafezin.png"
+              alt="Café"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Café</h3>
+            <p>R$ 4</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+        </div>
+
+        <div class="titulodoces">
+          <h2 class="titulocardapio">Doces</h2>
+        </div>
+
+        <div class="divssalgados">
+          <div class="card">
+            <img
+              src="img/cardapio/churrosmini.png"
+              alt="Mini Churros"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Mini Churros</h3>
+            <p>R$ 25</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/churros.png"
+              alt="Churros clássico"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Churros recheados</h3>
+            <p>R$ 35</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/morangochocolate.jpeg"
+              alt="Espetinho de Morango com Chocolate"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Espetinho de Morango com Chocolate</h3>
+            <p>R$ 22</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/churrus3.jpeg"
+              alt="Churros Especiais"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Churros Especiais</h3>
+            <p>R$ 28</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+        </div>
+        <div class="divssalgados">
+          <div class="card">
+            <img
+              src="img/cardapio/crepe1.jpeg"
+              alt="Crepe de Avelã com Confete"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Crepe Avelã com Confete</h3>
+            <p>R$ 25</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/crepebombom.png"
+              alt="Crepe Leitinho com Bombom"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Crepe Leitinho com Bombom</h3>
+            <p>R$ 30</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/crepemeio.png"
+              alt="Crepe Dois Amores"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Crepe Dois Amores</h3>
+            <p>R$ 20</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+
+          <div class="card">
+            <img
+              src="img/cardapio/crepaefds.jpeg"
+              alt="Crepe Queijo e Goiabada"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3>Crepe Queijo e Goiabada</h3>
+            <p>R$ 20</p>
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="button"
+              >Pedir Agora</a
+            >
+          </div>
+        </div>
+
+        <div class="divespecial">
+          <img
+            class="detalhe1"
+            src="img/detalhes.png"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <h2 class="tituloespecial">Produtos Especiais</h2>
+          <img
+            class="detalhe2"
+            src="img/detalhes.png"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <div class="carrossel-container">
+          <div class="carrossel-track">
+            <img
+              src="img/cardapio/bolodepote.png"
+              alt="Bolo de pote"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/potefelicidade.png"
+              alt="Pote da felicidade"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/morango.png"
+              alt="Morango do Amor"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/mouse.png"
+              alt="Mousse de maracujá"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/trufa.png"
+              alt="Trufas de chocolate"
+              loading="lazy"
+              decoding="async"
+            />
+
+            <img
+              src="img/cardapio/bolodepote.png"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/potefelicidade.png"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/morango.png"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/mouse.png"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="img/cardapio/trufa.png"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <h2 class="textoespecial">
+            Produtos que são vendidos periodicamente.
+          </h2>
+          <h2 class="textoespecial2">Informações no grupo abaixo:</h2>
+          <a
+            href="https://chat.whatsapp.com/G571Qd57Jan2ugbibPGwbl?s=qt&p=a&mlu=0&amv=1"
+            class="btn-whatsapp grupo-whatsapp"
+            title="Grupo Delícias Gourmet"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="./img/icon-whatsapp-svg-beige.svg"
+              alt=""
+              class="icon-whatsapp-grupo"
+            />
+            Grupo Delícias Gourmet
+          </a>
+        </div>
+      </section>
+      <section id="sobre" class="sobre-nos">
+        <div class="sobre-texto">
+          <h1>Sobre Nós</h1>
+
+          <p>
+            A Delícias Gourmet iniciou sua trajetória participando de feiras do
+            produtor, trabalhando com doces e salgados preparados com dedicação
+            e qualidade. Em 2016, surgiu a oportunidade de adquirir um food
+            truck, levando seus produtos para eventos em Toledo e diversas
+            cidades da região, como Cascavel, Palotina e Marechal Cândido
+            Rondon.
+          </p>
+
+          <p>
+            Em 2019 tivemos que parar por um período devido a pandemia. 2020
+            fomos trabalhar no Mato Grosso, 2025 retomamos as atividades com o
+            food truck em um ponto fixo localizado no Biopark.
+          </p>
+
+          <p>
+            Atualmente, a Delícias Gourmet oferece uma grande variedade de
+            produtos preparados no local, incluindo shawarmas, crepes franceses,
+            churros, pastéis, cafés e diversas opções de doces, além de
+            novidades que são lançadas periodicamente para seus clientes.
+          </p>
+        </div>
+
+        <div class="sobre-imagem">
+          <img
+            src="./img/food-truck.png"
+            alt="Food Truck Delícias Gourmet"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      </section>
+
+      <section class="banner-churros">
+        <div class="banner-overlay">
+          <h2>
+            Sabor que acompanha sua<br />
+            rotina universitária.
+          </h2>
+        </div>
+      </section>
+    </main>
+    <footer id="contato" class="footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img
+            class="logo-footer"
+            src="img/logo-delicias-gourmet-F8EFE3-header-112px.png"
+            alt="Logo escrito Delícias Gourmet"
+          />
+        </div>
+
+        <div class="footer-info">
+          <p class="footer-title">Horário de atendimento:</p>
+          <p>07h30 - 21h</p>
+          <p>(Segunda a Sexta)</p>
+        </div>
+
+        <address class="footer-location">
+          <p class="location-title">Localização:</p>
+          <p>Biopark, Toledo - PR, Brasil</p>
+        </address>
+
+        <div class="footer-social">
+          <p>Acesse nossas redes:</p>
+
+          <div class="social-icons">
+            <a
+              href="https://wa.me/554598352808"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Acesse o WhatsApp da Delícias Gourmet"
+              aria-label="WhatsApp da Delícias Gourmet"
+            >
+              <img
+                src="./img/icon-whatsapp-svg-beige.svg"
+                alt=""
+                class="social-icon"
+              />
+            </a>
+            <a
+              href="https://www.instagram.com/deliciasgourmet.2016toledo/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Acesse o Instagram da Delícias Gourmet"
+              aria-label="Instagram da Delícias Gourmet"
+            >
+              <img
+                src="./img/icon-instagram-svg-beige.svg"
+                alt=""
+                class="social-icon"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Delícias Gourmet. Todos os direitos reservados.</p>
+      </div>
+    </footer>
+  </body>
 </html>
