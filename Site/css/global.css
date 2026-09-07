@@ -113,3 +113,43 @@ button {
   border: none;
   cursor: pointer;
 }
+/* Popup exibido após adicionar um produto ao carrinho */
+.popup-carrinho {
+    /* Mantém o popup preso na tela */
+    position: fixed;
+
+    /* Distância do topo e da esquerda da tela */
+    top: 20px;
+    left: 20px;
+
+    /* Cor de fundo parecida com a identidade visual do site */
+    background-color: #861616;
+
+    /* Cor do texto */
+    color: white;
+
+    /* Espaçamento interno */
+    padding: 15px 25px;
+
+    /* Arredonda os cantos */
+    border-radius: 8px;
+
+    /* Tamanho do texto */
+    font-size: 16px;
+
+    /* Começa invisível */
+    opacity: 0;
+    visibility: hidden;
+
+    /* Faz aparecer e desaparecer suavemente */
+    transition: 0.3s;
+
+    /* Garante que fique na frente dos outros elementos */
+    z-index: 9999;
+}
+
+/* Essa classe é adicionada pelo JavaScript para mostrar o popup */
+.popup-carrinho.mostrar {
+    opacity: 1;
+    visibility: visible;
+}

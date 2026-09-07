@@ -168,6 +168,8 @@ function addToCart(card) {
   saveCart();
   renderCart();
 
+  mostrarPopupCarrinho();
+
   // O carrinho permanece fechado. O cliente pode abri-lo pelo botão do cabeçalho.
 }
 
@@ -334,3 +336,20 @@ $("checkout-button").addEventListener("click", async () => {
 // ------------------------------------------------------------
 // Executa uma primeira renderização quando a página é carregada.
 renderCart();
+// Mostra uma mensagem quando o produto é adicionado ao carrinho
+function mostrarPopupCarrinho() {
+
+    // Procura no HTML o elemento que possui o id "popup-carrinho"
+    const popup = document.getElementById("popup-carrinho");
+
+    // Adiciona a classe "mostrar", deixando o popup visível
+    popup.classList.add("mostrar");
+
+    // Espera 2 segundos antes de esconder novamente
+    setTimeout(function() {
+
+        // Remove a classe "mostrar"
+        popup.classList.remove("mostrar");
+
+    }, 2000);
+}
