@@ -231,6 +231,9 @@ function closeCart() {
   document.body.classList.remove("cart-open");
 }
 
+// Garante que o carrinho comece fechado ao carregar o site.
+closeCart();
+
 // Botão do carrinho no cabeçalho.
 $("cart-button").addEventListener("click", openCart);
 
