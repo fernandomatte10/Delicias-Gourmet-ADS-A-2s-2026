@@ -10,7 +10,7 @@
 //   - enviar o pedido para o Node.js;
 //   - abrir o WhatsApp com o resumo do pedido.
 //
-// O HTML do site contém os produtos do cardápio.
+// O cardápio é carregado do Sanity pelo arquivo produtos.js.
 // O Node.js fica responsável pelo backend e pelo registro do pedido.
 // ============================================================
 
@@ -67,6 +67,10 @@ function totalCart() {
 // RENDERIZAÇÃO DO CARRINHO
 // ------------------------------------------------------------
 // Atualiza a interface sempre que alguma coisa muda no carrinho.
+function escapeCartText(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+}
+
 function renderCart() {
   const container = $("cart-items");
   const empty = $("cart-empty");
@@ -91,9 +95,9 @@ function renderCart() {
     .map(
       (item, index) => `
     <article class="cart-item">
-      <img src="${item.image}" alt="${item.name}" />
+      <img src="${escapeCartText(item.image)}" alt="${escapeCartText(item.name)}" />
       <div>
-        <h3>${item.name}</h3>
+        <h3>${escapeCartText(item.name)}</h3>
         <div class="cart-item-price">${money(item.price)} cada</div>
 
         <div class="quantity-controls">
@@ -143,7 +147,7 @@ function addToCart(card) {
 
   // Preço exibido no cardápio.
   // Exemplo: "R$ 25,90" vira o número 25.90.
-  const price = Number(
+  const price = card.dataset.price !== undefined ? Number(card.dataset.price) : Number(
     card
       .querySelector("p")
       .textContent.replace(/[^0-9,]/g, "")
@@ -154,14 +158,15 @@ function addToCart(card) {
   const image = card.querySelector("img").getAttribute("src");
 
   // Verifica se o produto já está no carrinho.
-  const found = cart.find((item) => item.name === name);
+  const id = card.dataset.id;
+  const found = cart.find((item) => id ? item.id === id : item.name === name);
 
   if (found) {
     // Se já existe, apenas aumenta a quantidade.
     found.quantity += 1;
   } else {
     // Se é um produto novo, adiciona com quantidade 1.
-    cart.push({ name, price, image, quantity: 1 });
+    cart.push({ id, name, price, image, quantity: 1 });
   }
 
   // Salva e atualiza a tela.

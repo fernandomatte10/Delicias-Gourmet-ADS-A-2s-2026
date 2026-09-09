@@ -20,6 +20,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs/promises");
 const crypto = require("crypto");
+const {ordenarProdutos} = require("./ordenar-produtos");
 
 // Cria a aplicação Express.
 const app = express();
@@ -45,6 +46,33 @@ app.use(express.static(__dirname));
 // ------------------------------------------------------------
 // Quando o cliente acessar http://localhost:3000,
 // mostramos o index.html do site.
+// Lê somente produtos publicados e disponíveis, sem instalar dependências.
+// A consulta acontece no servidor: o navegador acessa apenas /api/produtos.
+app.get("/api/produtos", async (_req, res) => {
+  try {
+    const projectId = process.env.SANITY_PROJECT_ID || "9bplldxn";
+    const dataset = process.env.SANITY_DATASET || "production";
+    const url = new URL(`https://${projectId}.api.sanity.io/v2025-02-19/data/query/${dataset}`);
+    url.searchParams.set("perspective", "published");
+    // Uma consulta traz os produtos publicados e a ordem salva pelo painel.
+    // A ordenação em arquivo separado mantém a regra fácil de estudar e testar.
+    url.searchParams.set("query", '{"produtos": *[_type == "produto" && disponivel == true] {_id, nome, descricao, preco, "imagem": imagem.asset->url, "categoria": categoria->nome, "categoriaId": categoria._ref}, "ordem": *[_id == "ordemCardapio"][0]{categorias, produtos}}');
+    const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`Sanity respondeu com status ${response.status}`);
+    const { result } = await response.json();
+    if (!Array.isArray(result?.produtos)) throw new Error("Resposta inválida do Sanity");
+    const produtos = result.produtos.filter((produto) =>
+      typeof produto._id === "string" && typeof produto.nome === "string" &&
+      produto.nome.trim() && Number.isFinite(produto.preco) && produto.preco >= 0
+    );
+    res.set("Cache-Control", "no-store").json(ordenarProdutos(produtos, result.ordem));
+  } catch (error) {
+    console.error("Erro ao consultar produtos:", error.message);
+    res.status(502).json({ error: "Não foi possível carregar o cardápio." });
+  }
+});
+
+
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
