@@ -147,28 +147,6 @@
   font-family: var(--font-title);
 }
 
-.carrossel-container {
-  width: 100%;
-  overflow: hidden;
-  padding: 20px 0;
-  margin: 20px auto 50px;
-}
-
-.carrossel-track {
-  display: flex;
-  width: 3840px;
-  gap: 24px;
-  animation: rolagem 25s linear infinite;
-}
-
-.carrossel-track img {
-  width: 360px;
-  height: 260px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
 .textoespecial,
 .textoespecial2 {
   display: flex;
@@ -268,16 +246,6 @@
 
   .tituloespecial {
     font-size: 44px;
-  }
-
-  .carrossel-track img {
-    width: 240px;
-    height: 180px;
-  }
-
-  .carrossel-track {
-    width: 2600px;
-    gap: 20px;
   }
 
   .textoespecial {
