@@ -10,6 +10,7 @@
 
     <link rel="icon" type="image/png" href="./favicon.png" />
     <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/loja.css" />
     <title>Delícias Gourmet</title>
   </head>
 
@@ -94,6 +95,7 @@
       </div>
 
       <section id="cardapio" class="cardapio">
+        <p id="loja-status" class="loja-aviso" role="status">Verificando funcionamento da loja...</p>
         <p id="produtos-status" role="status" style="text-align: center">Carregando cardápio...</p>
         <div id="produtos-sanity"></div>
         <noscript>Ative o JavaScript para consultar o cardápio.</noscript>
@@ -269,12 +271,14 @@
           placeholder="Digite aqui alguma alteração ou observação do pedido..."
         ></textarea>
         <div class="cart-total-row"><span>Total</span><strong id="cart-total">R$ 0,00</strong></div>
+        <p id="carrinho-loja-status" class="loja-aviso" role="status">Verificando funcionamento da loja...</p>
         <button class="checkout-button" id="checkout-button" type="button" disabled>Finalizar pedido pelo WhatsApp</button>
         <button class="clear-cart" id="clear-cart" type="button" disabled>Limpar carrinho</button>
       </div>
     </aside>
 
 
+    <script src="./js/loja.js" defer></script>
     <script src="./js/carrinho.js" defer></script>
     <script src="./js/produtos.js" defer></script>
 
@@ -290,8 +294,8 @@
 
         <div class="footer-info">
           <p class="footer-title">Horário de atendimento:</p>
-          <p>07h30 - 21h</p>
-          <p>(Segunda a Sexta)</p>
+          <div id="loja-horarios">Carregando horários...</div>
+          <p>Horário de Brasília</p>
         </div>
 
         <address class="footer-location">

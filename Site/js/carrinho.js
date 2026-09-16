@@ -16,7 +16,7 @@
 
 // Número do WhatsApp que receberá os pedidos.
 // Formato internacional: 55 + DDD + número, sem espaços ou símbolos.
-const WHATSAPP = "554598352808";
+const WHATSAPP = "5544998860173";
 
 // Endpoint do backend Node.js que registra os pedidos.
 const API_URL = "/api/pedidos";
@@ -84,7 +84,7 @@ function renderCart() {
   total.textContent = money(totalCart());
 
   // Desabilita os botões quando não há produtos.
-  checkout.disabled = cart.length === 0;
+  window.atualizarBotaoPedido();
   clear.disabled = cart.length === 0;
 
   // Mostra a mensagem de carrinho vazio somente quando necessário.
@@ -264,7 +264,7 @@ $("clear-cart").addEventListener("click", () => {
 // Ao clicar no botão, o pedido é registrado no Node.js e depois
 // o WhatsApp é aberto com todos os itens, quantidades, total e observação.
 $("checkout-button").addEventListener("click", async () => {
-  if (!cart.length) return;
+  if (!cart.length || window.pedidoEmEnvio || !window.estadoLoja.aceitaPedidos) return;
 
   const observations = $("order-observations").value.trim();
 
@@ -281,6 +281,7 @@ $("checkout-button").addEventListener("click", async () => {
   };
 
   const button = $("checkout-button");
+  window.pedidoEmEnvio = true;
   button.disabled = true;
   button.textContent = "Preparando pedido...";
 
@@ -293,7 +294,10 @@ $("checkout-button").addEventListener("click", async () => {
     });
 
     if (!response.ok) {
-      throw new Error("Falha ao registrar pedido");
+      const falha = await response.json().catch(() => ({}));
+      if (falha.funcionamento) window.aplicarEstadoLoja(falha.funcionamento);
+      else if (response.status === 503) window.aplicarEstadoLoja({aceitaPedidos: false, mensagem: falha.error || "Não foi possível confirmar o funcionamento da loja."});
+      throw new Error(falha.error || "Falha ao registrar pedido");
     }
 
     const saved = await response.json();
@@ -331,11 +335,11 @@ $("checkout-button").addEventListener("click", async () => {
   } catch (error) {
     console.error("Erro ao finalizar pedido:", error);
     alert(
-      "Não foi possível registrar o pedido. Verifique se o Node.js está rodando."
+      error.message || "Não foi possível registrar o pedido. Tente novamente."
     );
   } finally {
-    button.disabled = cart.length === 0;
-    button.textContent = "Finalizar pedido pelo WhatsApp";
+    window.pedidoEmEnvio = false;
+    window.atualizarBotaoPedido();
   }
 });
 

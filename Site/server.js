@@ -20,6 +20,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs/promises");
 const crypto = require("crypto");
+const {consultarFuncionamento} = require("./funcionamento");
 const {ordenarProdutos} = require("./ordenar-produtos");
 
 // Cria a aplicação Express.
@@ -73,6 +74,13 @@ app.get("/api/produtos", async (_req, res) => {
 });
 
 
+// Consulta pública apenas do status e dos horários da loja.
+app.get("/api/funcionamento", async (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  try { res.json(await consultarFuncionamento()); }
+  catch { res.status(503).json({aceitaPedidos: false, mensagem: "Não foi possível confirmar o funcionamento da loja."}); }
+});
+
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -114,6 +122,15 @@ app.post("/api/pedidos", async (req, res) => {
     // Validação básica do cliente e dos itens.
     if (!customer?.nome || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "Pedido inválido." });
+    }
+
+    // RF-05: bloquear no servidor é obrigatório; desabilitar o botão sozinho não basta.
+    // Se a consulta falhar, nenhum pedido é gravado e o cliente mantém seu carrinho.
+    let funcionamento;
+    try { funcionamento = await consultarFuncionamento(); }
+    catch { return res.status(503).json({error: "Não foi possível confirmar se a loja está aberta. Tente novamente."}); }
+    if (!funcionamento.aceitaPedidos) {
+      return res.status(409).json({error: funcionamento.mensagem, funcionamento});
     }
 
     // Limpa e limita os dados dos produtos antes de salvar.
