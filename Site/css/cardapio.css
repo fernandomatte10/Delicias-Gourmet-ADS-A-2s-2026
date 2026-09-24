@@ -1,3 +1,9 @@
+
+/* O botão Ver mais só aparece no modo celular */
+.card .ver-mais-descricao {
+  display: none;
+}
+
 .cardapio {
   overflow: hidden;
 }
@@ -328,3 +334,225 @@
 .order-observations-label { display:block; margin:14px 0 6px; font-weight:700; font-size:14px; }
 .order-observations-label span { display:block; margin-top:3px; font-weight:400; opacity:.65; }
 .order-observations { display:block; box-sizing:border-box; width:100%; margin-bottom:12px; padding:11px 12px; border:1px solid rgba(0,0,0,.2); border-radius:7px; background:#fff; color:#333; font:inherit; resize:vertical; }
+
+
+/* =========================================================
+   CARDÁPIO NO CELULAR - formato lista, inspirado em apps
+   ========================================================= */
+@media screen and (max-width: 767px) {
+  .divsshawarma,
+  .divssalgados {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 94%;
+    max-width: 100%;
+    gap: 0;
+    margin: 0 auto 35px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: none;
+    min-height: 118px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto 1fr;
+    column-gap: 12px;
+    align-items: center;
+    padding: 14px 0;
+    border-radius: 0;
+    border-bottom: 1px solid #e8e8e8;
+    box-shadow: none;
+    text-align: left;
+    overflow: visible;
+  }
+
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .card img {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: 92px;
+    height: 92px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+
+  .card h3 {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 15px;
+    line-height: 1.25;
+    margin: 0 0 5px;
+    align-self: end;
+  }
+
+  .card p {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 13px;
+    line-height: 1.3;
+    margin: 0 0 5px;
+    font-weight: 500;
+    color: #555;
+  }
+
+  /* O primeiro p é o preço */
+  .card > p:first-of-type {
+    grid-column: 2;
+    grid-row: 3;
+    margin: 0;
+    color: #222;
+    font-size: 14px;
+    font-weight: 700;
+    align-self: start;
+  }
+
+  /* Quando existe descrição, ela fica entre nome e preço */
+  .card > p:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 3px;
+  }
+
+  .card .button {
+    grid-column: 3;
+    grid-row: 1 / 4;
+    width: auto;
+    min-width: 40px;
+    margin: 0;
+    padding: 9px 10px;
+    border-radius: 7px;
+    font-size: 0;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .card .button::after {
+    content: "+ Adicionar";
+    font-size: 11px;
+  }
+
+  .titulosalgado,
+  .titulodoces {
+    width: 94%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .titulosalgado h2,
+  .titulodoces h2 {
+    font-size: 24px;
+    text-align: left;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .divsshawarma,
+  .divssalgados {
+    width: 92%;
+  }
+
+  .card {
+    grid-template-columns: 82px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    min-height: 108px;
+    padding: 12px 0;
+  }
+
+  .card img {
+    width: 82px;
+    height: 82px;
+    border-radius: 9px;
+  }
+
+  .card h3 {
+    font-size: 14px;
+  }
+
+  .card p {
+    font-size: 12px;
+  }
+
+  .card > p:first-of-type {
+    font-size: 13px;
+  }
+
+  .card .button {
+    padding: 8px 7px;
+  }
+
+  .card .button::after {
+    font-size: 10px;
+  }
+}
+
+
+/* Descrição compacta no celular, com expansão por "Ver mais" */
+@media screen and (max-width: 767px) {
+  .card .descricao-produto {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    margin: 0 0 3px;
+    align-self: start;
+  }
+
+  .card .descricao-texto {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #666;
+  }
+
+  .card .descricao-aberta .descricao-texto {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  .card .ver-mais-descricao {
+    display: inline-block;
+    margin: 2px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-wine);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .card .ver-mais-descricao:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Com a descrição em um único bloco, o preço fica logo abaixo dela. */
+  .card > p:first-of-type {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .card .descricao-texto {
+    font-size: 11px;
+    -webkit-line-clamp: 2;
+  }
+
+  .card .ver-mais-descricao {
+    font-size: 10px;
+  }
+}

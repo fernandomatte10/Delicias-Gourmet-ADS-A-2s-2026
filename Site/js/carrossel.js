@@ -43,8 +43,9 @@ function atualizarCarrossel(animacao = true) {
 
     const gap = parseFloat(estilo.gap);
 
-    const deslocamento =
+    let deslocamento =
         posicaoAtual * (larguraProduto + gap);
+
 
     if (animacao) {
         carrossel.style.transition = "transform 0.5s ease";
@@ -103,6 +104,11 @@ setInterval(function () {
     atualizarCarrossel();
 
 }, 5000);
+
+// Recalcula a posição quando a tela muda de tamanho/orientação.
+window.addEventListener("resize", function () {
+    atualizarCarrossel(false);
+});
 
 // Posiciona o carrossel no início
 atualizarCarrossel(false);

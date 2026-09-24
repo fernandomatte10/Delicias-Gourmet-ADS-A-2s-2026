@@ -40,14 +40,32 @@
         preco.textContent = produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
         card.append(img, nome, preco);
         if (produto.descricao) {
+          const descricaoWrap = document.createElement("div");
+          descricaoWrap.className = "descricao-produto";
+
           const descricao = document.createElement("p");
+          descricao.className = "descricao-texto";
           descricao.textContent = produto.descricao;
-          card.append(descricao);
+
+          const verMais = document.createElement("button");
+          verMais.type = "button";
+          verMais.className = "ver-mais-descricao";
+          verMais.textContent = "Ver mais";
+          verMais.setAttribute("aria-expanded", "false");
+          verMais.addEventListener("click", () => {
+            const aberta = descricaoWrap.classList.toggle("descricao-aberta");
+            verMais.textContent = aberta ? "Ver menos" : "Ver mais";
+            verMais.setAttribute("aria-expanded", String(aberta));
+          });
+
+          descricaoWrap.append(descricao, verMais);
+          card.append(descricaoWrap);
         }
         const button = document.createElement("button");
         button.type = "button";
         button.className = "button add-to-cart";
         button.textContent = "Adicionar ao carrinho";
+        button.setAttribute("aria-label", `Adicionar ${produto.nome} ao carrinho`);
         card.append(button);
         grid.append(card);
       }
