@@ -15,7 +15,10 @@
 /* Área que mostra somente os produtos visíveis */
 .carrossel-viewport {
     width: 1128px;
+    height: 300px;
     overflow: hidden;
+    padding: 10px 0;
+    box-sizing: border-box;
 }
 
 
@@ -24,6 +27,7 @@
     display: flex;
     gap: 24px;
     width: max-content;
+    align-items: center;
 
     transition: transform 0.5s ease;
 }
@@ -40,6 +44,17 @@
     border-radius: 12px;
 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+    /* Suaviza o aumento e a redução */
+    transition: transform 0.5s ease;
+}
+
+
+/* Produto que está no centro */
+.carrossel-track img.produto-central {
+    transform: scale(1.08);
+    z-index: 2;
+    border-radius: 12px;
 }
 
 
@@ -75,9 +90,6 @@
 }
 
 
-
-
-
 /* Carrossel responsivo */
 @media screen and (max-width: 767px) {
     .carrossel-container {
@@ -93,6 +105,7 @@
         overflow: visible;
     }
 
+
     /* A área da imagem fica exatamente centralizada entre as setas */
     .carrossel-viewport {
         width: calc(100% - 84px);
@@ -100,7 +113,9 @@
         min-width: 0;
         margin: 0 auto;
         overflow: hidden;
+        height: auto;
     }
+
 
     .carrossel-track {
         display: flex;
@@ -108,6 +123,7 @@
         width: max-content;
         align-items: center;
     }
+
 
     .carrossel-track img {
         width: calc(100vw - 84px);
@@ -119,6 +135,16 @@
         border-radius: 12px;
         box-sizing: border-box;
     }
+
+
+    /*
+     * No celular o carrossel mostra uma imagem por vez.
+     * Por isso não aumenta a imagem central.
+     */
+    .carrossel-track img.produto-central {
+        transform: none;
+    }
+
 
     .seta {
         position: absolute;
@@ -137,13 +163,16 @@
         justify-content: center;
     }
 
+
     .seta-esquerda {
         left: 7px;
     }
 
+
     .seta-direita {
         right: 7px;
     }
+
 
     .seta img {
         display: block !important;
@@ -155,16 +184,19 @@
     }
 }
 
+
 @media screen and (max-width: 420px) {
     .carrossel-viewport {
         width: calc(100% - 68px);
         max-width: calc(100% - 68px);
     }
 
+
     .carrossel-track img {
         width: calc(100vw - 68px);
         flex-basis: calc(100vw - 68px);
     }
+
 
     .seta {
         width: 32px;
@@ -173,13 +205,16 @@
         min-height: 32px;
     }
 
+
     .seta-esquerda {
         left: 3px;
     }
 
+
     .seta-direita {
         right: 3px;
     }
+
 
     .seta img {
         width: 29px;

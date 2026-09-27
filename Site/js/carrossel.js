@@ -1,5 +1,4 @@
 const carrossel = document.querySelector(".carrossel-track");
-
 const setaEsquerda = document.querySelector(".seta-esquerda");
 const setaDireita = document.querySelector(".seta-direita");
 
@@ -8,44 +7,43 @@ const produtosEspeciais = Array.from(
 );
 
 const quantidadeVisivel = 3;
-
 let posicaoAtual = 0;
+let temporizadorCentral = null;
 
-// Criando cópias dos primeiros produtos
+
+// CRIA OS CLONES
+
+// Clona os primeiros produtos
 produtosEspeciais.slice(0, quantidadeVisivel).forEach(function (produto) {
-
     const copia = produto.cloneNode(true);
-
     carrossel.appendChild(copia);
-
 });
 
-// Criando cópias dos últimos produtos
+// Clona os últimos produtos
 produtosEspeciais.slice(-quantidadeVisivel).forEach(function (produto) {
-
     const copia = produto.cloneNode(true);
-
     carrossel.insertBefore(copia, carrossel.firstChild);
-
 });
 
-// Pegando todos os produtos depois das cópias
+
+// Todos os produtos, incluindo os clones
 const produtos = carrossel.querySelectorAll("img");
 
-// Começa mostrando os produtos especiais
+
+// Começa mostrando os três produtos originais
 posicaoAtual = quantidadeVisivel;
 
-function atualizarCarrossel(animacao = true) {
 
+// MOVE O CARROSSEL
+
+function atualizarCarrossel(animacao = true) {
     const larguraProduto = produtos[0].offsetWidth;
 
     const estilo = window.getComputedStyle(carrossel);
-
     const gap = parseFloat(estilo.gap);
 
-    let deslocamento =
+    const deslocamento =
         posicaoAtual * (larguraProduto + gap);
-
 
     if (animacao) {
         carrossel.style.transition = "transform 0.5s ease";
@@ -57,58 +55,169 @@ function atualizarCarrossel(animacao = true) {
         `translateX(-${deslocamento}px)`;
 }
 
-// Avançar
-setaDireita.addEventListener("click", function () {
+
+// ATUALIZA QUAL É A IMAGEM CENTRAL
+
+function atualizarProdutoCentral() {
+    produtos.forEach(function (produto) {
+        produto.classList.remove("produto-central");
+    });
+
+    const indiceCentral = posicaoAtual + 1;
+
+    if (produtos[indiceCentral]) {
+        produtos[indiceCentral].classList.add("produto-central");
+    }
+}
+
+
+// MOVE PARA A DIREITA
+
+function moverDireita() {
+
+    // Remove o destaque antes de começar o movimento
+    produtos.forEach(function (produto) {
+        produto.classList.remove("produto-central");
+    });
 
     posicaoAtual++;
 
-    atualizarCarrossel();
+    atualizarCarrossel(true);
 
-});
+    clearTimeout(temporizadorCentral);
 
-// Voltar
-setaEsquerda.addEventListener("click", function () {
+    // O movimento dura 0.5s.
+    // Depois que chegar ao centro, aumenta a imagem.
+    temporizadorCentral = setTimeout(function () {
+
+        const quantidadeProdutos = produtosEspeciais.length;
+
+        // Chegou nos clones do começo
+        if (posicaoAtual >= quantidadeProdutos + quantidadeVisivel) {
+
+            // Desliga temporariamente a animação das imagens
+            produtos.forEach(function (produto) {
+                produto.style.transition = "none";
+            });
+
+            // Volta para o equivalente original
+            posicaoAtual = quantidadeVisivel;
+
+            atualizarCarrossel(false);
+            atualizarProdutoCentral();
+
+            // Reativa a animação das imagens
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    produtos.forEach(function (produto) {
+                        produto.style.transition = "transform 0.5s ease";
+                    });
+                });
+            });
+
+            return;
+        }
+
+        atualizarProdutoCentral();
+
+    }, 500);
+}
+
+
+// MOVE PARA A ESQUERDA
+
+function moverEsquerda() {
+
+    // Remove o destaque antes de começar o movimento
+    produtos.forEach(function (produto) {
+        produto.classList.remove("produto-central");
+    });
 
     posicaoAtual--;
 
-    atualizarCarrossel();
+    atualizarCarrossel(true);
 
-});
+    clearTimeout(temporizadorCentral);
 
-// Quando chegar nas cópias do final
-carrossel.addEventListener("transitionend", function () {
+    temporizadorCentral = setTimeout(function () {
 
-    const quantidadeProdutos = produtosEspeciais.length;
+        const quantidadeProdutos = produtosEspeciais.length;
 
-    if (posicaoAtual >= quantidadeProdutos + quantidadeVisivel) {
+        // Chegou nos clones do final
+        if (posicaoAtual < quantidadeVisivel) {
 
-        posicaoAtual = quantidadeVisivel;
+            produtos.forEach(function (produto) {
+                produto.style.transition = "none";
+            });
 
-        atualizarCarrossel(false);
-    }
+            posicaoAtual =
+                quantidadeProdutos + quantidadeVisivel - 1;
 
-    if (posicaoAtual < quantidadeVisivel) {
+            atualizarCarrossel(false);
+            atualizarProdutoCentral();
 
-        posicaoAtual = quantidadeProdutos + quantidadeVisivel - 1;
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    produtos.forEach(function (produto) {
+                        produto.style.transition = "transform 0.5s ease";
+                    });
+                });
+            });
 
-        atualizarCarrossel(false);
-    }
+            return;
+        }
 
-});
+        atualizarProdutoCentral();
 
-// Movimento automático
+    }, 500);
+}
+
+
+// BOTÕES
+
+setaDireita.addEventListener("click", moverDireita);
+
+setaEsquerda.addEventListener("click", moverEsquerda);
+
+
+// PASSAGEM AUTOMÁTICA
+
 setInterval(function () {
-
-    posicaoAtual++;
-
-    atualizarCarrossel();
-
+    moverDireita();
 }, 5000);
 
-// Recalcula a posição quando a tela muda de tamanho/orientação.
+
+// REDIMENSIONAMENTO
+
 window.addEventListener("resize", function () {
+    clearTimeout(temporizadorCentral);
+
     atualizarCarrossel(false);
+    atualizarProdutoCentral();
 });
 
-// Posiciona o carrossel no início
+
+// ESTADO INICIAL
+
 atualizarCarrossel(false);
+atualizarProdutoCentral();
+
+
+// CLIQUE NAS IMAGENS
+
+carrossel.addEventListener("click", function (evento) {
+    if (evento.target.tagName !== "IMG") return;
+
+    const grupoDelicias = document.querySelector("#grupo-delicias");
+
+    if (grupoDelicias) {
+        const posicao =
+            grupoDelicias.getBoundingClientRect().top +
+            window.scrollY -250;
+
+        window.scrollTo({
+            top: posicao,
+            behavior: "smooth"
+        });
+    }
+});
