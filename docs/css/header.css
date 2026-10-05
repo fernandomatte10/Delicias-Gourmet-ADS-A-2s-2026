@@ -1,0 +1,125 @@
+.header {
+  background-color: var(--color-wine); /* Cor background */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Espaçado no meio */
+  align-items: center; /* Alinha as coisas no centro */
+  padding: 16px 28px;
+}
+/* Logo */
+.logo {
+  display: block;
+  flex-shrink: 0;
+}
+.logo img {
+  display: inline-block;
+  width: 100px;
+  height: auto;
+}
+/* Menu */
+.navigation-menu {
+  display: contents;
+}
+.menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+}
+/* Tamanho do svg menu */
+.menu-hamburguer {
+  width: 28px;
+  height: auto;
+}
+.nav-menu {
+  display: none;
+  width: 100%;
+  margin-top: 16px;
+  background-color: var(--color-wine);
+}
+/* Menu aberto */
+#menu:checked ~ .nav-menu {
+  display: block;
+}
+.list-links {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.list-links a {
+  font-family: var(--font-text);
+  font-size: 0.95rem;
+  font-weight: var(--weight-menu);
+  color: var(--color-beige);
+  transition: 0.3s ease;
+  text-decoration: none;
+}
+.list-links a:not(.btn-whatsapp) {
+  display: inline-block;
+  width: fit-content;
+  padding-bottom: 6px;
+
+  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 0% 2px;
+
+  transition:
+    color 0.3s ease,
+    background-size 0.3s ease;
+}
+.list-links a:not(.btn-whatsapp):hover {
+  color: var(--color-gold);
+  background-size: 100% 2px;
+}
+
+/* Botão WhatsApp */
+.btn-whatsapp {
+  display: inline-flex;
+  background-color: var(--color-gold);
+  color: var(--color-wine);
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  gap: 8px;
+}
+.list-links .btn-whatsapp:hover {
+  color: var(--color-text);
+}
+.icon-whatsapp {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+@media screen and (min-width: 768px) {
+  .header {
+    flex-wrap: nowrap;
+    padding: 28px 80px;
+  }
+  .logo img {
+    width: 160px;
+  }
+  .menu-button {
+    display: none;
+  }
+  .nav-menu {
+    display: block;
+    width: auto;
+    margin-top: 0;
+    background-color: transparent;
+  }
+  .list-links {
+    flex-direction: row;
+    align-items: center;
+    gap: 32px;
+  }
+  .list-links a {
+    font-size: 1.1rem;
+  }
+}

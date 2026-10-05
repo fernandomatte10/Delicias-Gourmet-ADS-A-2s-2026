@@ -1,0 +1,38 @@
+.banner-churros {
+  background-image: url("../img/banner-churros.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+}
+
+.banner-overlay {
+  width: 100%;
+  min-height: 400px;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  padding-left: 10%;
+}
+
+.banner-overlay h2 {
+  color: var(--color-white);
+  font-family: var(--font-title);
+  font-size: 3.0rem;
+  max-width: 500px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  .banner-overlay {
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .banner-overlay h2 {
+    font-size: 2.2rem;
+  }
+}

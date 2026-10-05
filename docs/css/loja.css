@@ -1,0 +1,8 @@
+/* Aviso usa as cores do site e permanece legível no celular e no carrinho. */
+.loja-aviso { padding: 14px 18px; border-radius: 8px; background: #fff0db; color: #684314; line-height: 1.5; font-size: 17px; font-weight: 600; }
+#loja-status { width: 90%; max-width: 900px; margin: 0 auto 24px; text-align: center; }
+#carrinho-loja-status { margin: 0 0 12px; }
+.loja-aviso[hidden] { display: none; }
+.loja-aviso[data-estado="pausada"] { background: #ffe8e5; color: #822c27; }
+#loja-horarios p { margin: 5px 0; font-size: 14px; line-height: 1.5; }
+

@@ -1,0 +1,223 @@
+/* Área principal do carrossel */
+.carrossel-container {
+    display: grid;
+    grid-template-columns: 70px 1128px 70px;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    margin: 20px auto 50px;
+    padding: 20px 0;
+}
+
+
+/* Área que mostra somente os produtos visíveis */
+.carrossel-viewport {
+    width: 1128px;
+    height: 300px;
+    overflow: hidden;
+    padding: 10px 0;
+    box-sizing: border-box;
+}
+
+
+/* Faixa que contém todos os produtos */
+.carrossel-track {
+    display: flex;
+    gap: 24px;
+    width: max-content;
+    align-items: center;
+
+    transition: transform 0.5s ease;
+}
+
+
+/* Imagens dos produtos */
+.carrossel-track img {
+    width: 360px;
+    height: 260px;
+
+    object-fit: cover;
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+    /* Suaviza o aumento e a redução */
+    transition: transform 0.5s ease;
+}
+
+
+/* Produto que está no centro */
+.carrossel-track img.produto-central {
+    transform: scale(1.08);
+    z-index: 2;
+    border-radius: 12px;
+}
+
+
+/* Botões das setas */
+.seta {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+}
+
+
+/* Imagem da seta */
+.seta img {
+    width: 55px;
+    height: 55px;
+
+    display: block;
+}
+
+
+/* Seta esquerda */
+.seta-esquerda img {
+    transform: rotate(180deg);
+}
+
+
+/* Carrossel responsivo */
+@media screen and (max-width: 767px) {
+    .carrossel-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 20px auto 35px;
+        padding: 12px 0;
+        overflow: visible;
+    }
+
+
+    /* A área da imagem fica exatamente centralizada entre as setas */
+    .carrossel-viewport {
+        width: calc(100% - 84px);
+        max-width: calc(100% - 84px);
+        min-width: 0;
+        margin: 0 auto;
+        overflow: hidden;
+        height: auto;
+    }
+
+
+    .carrossel-track {
+        display: flex;
+        gap: 10px;
+        width: max-content;
+        align-items: center;
+    }
+
+
+    .carrossel-track img {
+        width: calc(100vw - 84px);
+        max-width: none;
+        height: auto;
+        aspect-ratio: 420 / 257;
+        object-fit: cover;
+        flex: 0 0 calc(100vw - 84px);
+        border-radius: 12px;
+        box-sizing: border-box;
+    }
+
+
+    /*
+     * No celular o carrossel mostra uma imagem por vez.
+     * Por isso não aumenta a imagem central.
+     */
+    .carrossel-track img.produto-central {
+        transform: none;
+    }
+
+
+    .seta {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 10;
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+        padding: 0;
+        align-items: center;
+        justify-content: center;
+    }
+
+
+    .seta-esquerda {
+        left: 7px;
+    }
+
+
+    .seta-direita {
+        right: 7px;
+    }
+
+
+    .seta img {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 34px;
+        height: 34px;
+        max-width: none;
+    }
+}
+
+
+@media screen and (max-width: 420px) {
+    .carrossel-viewport {
+        width: calc(100% - 68px);
+        max-width: calc(100% - 68px);
+    }
+
+
+    .carrossel-track img {
+        width: calc(100vw - 68px);
+        flex-basis: calc(100vw - 68px);
+    }
+
+
+    .seta {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+
+
+    .seta-esquerda {
+        left: 3px;
+    }
+
+
+    .seta-direita {
+        right: 3px;
+    }
+
+
+    .seta img {
+        width: 29px;
+        height: 29px;
+    }
+}
