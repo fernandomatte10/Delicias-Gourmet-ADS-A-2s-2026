@@ -6,3 +6,7 @@
 .loja-aviso[data-estado="pausada"] { background: #ffe8e5; color: #822c27; }
 #loja-horarios p { margin: 5px 0; font-size: 14px; line-height: 1.5; }
 
+
+/* Aviso dentro do carrinho (preço alterado, item indisponível ou erro ao finalizar).
+   Reaproveita o visual de .loja-aviso, com texto um pouco menor para caber no carrinho. */
+#carrinho-aviso { margin: 0 0 12px; font-size: 15px; background: #ffe8e5; color: #822c27; }

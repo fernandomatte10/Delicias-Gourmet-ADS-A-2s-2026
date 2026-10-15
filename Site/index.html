@@ -276,6 +276,8 @@
           placeholder="Digite aqui alguma alteração ou observação do pedido..."
         ></textarea>
         <div class="cart-total-row"><span>Total</span><strong id="cart-total">R$ 0,00</strong></div>
+        <!-- Aviso do carrinho: preço alterado, item indisponível ou erro ao finalizar (preenchido pelo carrinho.js) -->
+        <p id="carrinho-aviso" class="loja-aviso" role="alert" hidden></p>
         <p id="carrinho-loja-status" class="loja-aviso" role="status">Verificando funcionamento da loja...</p>
         <button class="checkout-button" id="checkout-button" type="button" disabled>Finalizar pedido pelo WhatsApp</button>
         <button class="clear-cart" id="clear-cart" type="button" disabled>Limpar carrinho</button>

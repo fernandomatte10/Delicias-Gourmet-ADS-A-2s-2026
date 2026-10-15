@@ -72,6 +72,9 @@
       fragment.append(titulo, grid);
     }
     container.replaceChildren(fragment);
+    // Confere o carrinho salvo no navegador com o cardápio que acabou de chegar:
+    // atualiza preços e remove itens indisponíveis (função definida em carrinho.js).
+    if (typeof window.sincronizarCarrinho === "function") window.sincronizarCarrinho(produtos);
     status.textContent = produtos.length ? "" : "Nenhum produto disponível no momento.";
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);

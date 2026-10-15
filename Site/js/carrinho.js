@@ -188,6 +188,7 @@ document.addEventListener("click", (event) => {
   const add = event.target.closest(".add-to-cart");
 
   if (add) {
+    esconderAvisoCarrinho();
     addToCart(add.closest(".card"));
   }
 
@@ -195,6 +196,7 @@ document.addEventListener("click", (event) => {
   const action = event.target.closest("[data-action]");
 
   if (action) {
+    esconderAvisoCarrinho();
     const index = Number(action.dataset.index);
 
     if (action.dataset.action === "increase") {
@@ -223,6 +225,8 @@ document.addEventListener("click", (event) => {
 // ABRIR E FECHAR O CARRINHO
 // ------------------------------------------------------------
 function openCart() {
+  // Sempre que o carrinho é aberto, conferimos preços e disponibilidade atuais.
+  atualizarCardapioECarrinho();
   $("cart-drawer").setAttribute("aria-hidden", "false");
   $("cart-drawer").hidden = false;
   $("cart-overlay").hidden = false;
@@ -252,6 +256,7 @@ $("cart-overlay").addEventListener("click", closeCart);
 // LIMPAR CARRINHO
 // ------------------------------------------------------------
 $("clear-cart").addEventListener("click", () => {
+  esconderAvisoCarrinho();
   cart = [];
   saveCart();
   renderCart();
@@ -265,6 +270,9 @@ $("clear-cart").addEventListener("click", () => {
 // o WhatsApp é aberto com todos os itens, quantidades, total e observação.
 $("checkout-button").addEventListener("click", async () => {
   if (!cart.length || window.pedidoEmEnvio || !window.estadoLoja.aceitaPedidos) return;
+
+  // Uma nova tentativa de finalizar apaga o aviso anterior.
+  esconderAvisoCarrinho();
 
   const observations = $("order-observations").value.trim();
 
@@ -297,6 +305,8 @@ $("checkout-button").addEventListener("click", async () => {
       const falha = await response.json().catch(() => ({}));
       if (falha.funcionamento) window.aplicarEstadoLoja(falha.funcionamento);
       else if (response.status === 503) window.aplicarEstadoLoja({aceitaPedidos: false, mensagem: falha.error || "Não foi possível confirmar o funcionamento da loja."});
+      // O servidor conferiu os itens no Sanity e algo mudou: atualiza o carrinho para o cliente revisar.
+      if (falha.indisponiveis || falha.alterados) atualizarCarrinhoComServidor(falha);
       throw new Error(falha.error || "Falha ao registrar pedido");
     }
 
@@ -308,12 +318,13 @@ $("checkout-button").addEventListener("click", async () => {
       `Pedido: #${saved.id}`,
       "",
       "*Itens do pedido:*",
-      ...cart.map(
+      // Usa os itens e o total confirmados pelo servidor (dados oficiais do Sanity).
+      ...saved.items.map(
         (item) =>
           `${item.quantity}x ${item.name} — ${money(item.price * item.quantity)}`
       ),
       "",
-      `*Total: ${money(totalCart())}*`,
+      `*Total: ${money(saved.total)}*`,
     ];
 
     if (observations) {
@@ -334,13 +345,168 @@ $("checkout-button").addEventListener("click", async () => {
     closeCart();
   } catch (error) {
     console.error("Erro ao finalizar pedido:", error);
-    alert(
+    // Mostra o motivo dentro do próprio carrinho (em vez do alert() do navegador).
+    mostrarAvisoCarrinho(
       error.message || "Não foi possível registrar o pedido. Tente novamente."
     );
   } finally {
     window.pedidoEmEnvio = false;
     window.atualizarBotaoPedido();
   }
+});
+
+// ------------------------------------------------------------
+// ATUALIZAR CARRINHO COM A RESPOSTA DO SERVIDOR
+// ------------------------------------------------------------
+// Remove itens que não estão mais disponíveis e aplica os preços atuais do Sanity.
+// O cliente vê o carrinho corrigido e decide se finaliza novamente.
+function atualizarCarrinhoComServidor({ indisponiveis = [], alterados = [] }) {
+  const removidos = new Set(indisponiveis.map((item) => item.id));
+  cart = cart.filter((item) => !removidos.has(typeof item.id === "string" ? item.id : null));
+  for (const novo of alterados) {
+    const item = cart.find((i) => i.id === novo.id);
+    if (item) {
+      item.price = novo.price;
+      item.name = novo.name;
+    }
+  }
+  saveCart();
+  renderCart();
+}
+
+// ------------------------------------------------------------
+// AVISO DENTRO DO CARRINHO
+// ------------------------------------------------------------
+// Mostra uma mensagem no próprio carrinho (elemento #carrinho-aviso do index.html),
+// no lugar da janela alert() do navegador.
+// O aviso fica visível até o cliente mexer no carrinho ou tentar finalizar de novo.
+function mostrarAvisoCarrinho(mensagem) {
+  const aviso = $("carrinho-aviso");
+  aviso.textContent = mensagem;
+  aviso.hidden = false;
+}
+
+// Esconde o aviso do carrinho.
+function esconderAvisoCarrinho() {
+  const aviso = $("carrinho-aviso");
+  aviso.hidden = true;
+  aviso.textContent = "";
+}
+
+// ------------------------------------------------------------
+// SINCRONIZAR O CARRINHO COM O CARDÁPIO ATUAL
+// ------------------------------------------------------------
+// Recebe a lista de produtos disponíveis (a mesma da rota /api/produtos)
+// e compara com o carrinho salvo no navegador:
+//   - produto que não está mais na lista (esgotado/excluído) sai do carrinho;
+//   - produto com preço diferente recebe o preço atual.
+// Se algo mudar, o cliente vê um aviso dentro do carrinho.
+// Também é chamada pelo produtos.js quando o cardápio termina de carregar.
+function sincronizarCarrinho(produtos) {
+  // Map: id do produto -> dados atuais vindos do Sanity.
+  const atuais = new Map(produtos.map((produto) => [produto._id, produto]));
+  const removidos = [];
+  const alterados = [];
+
+  // filter mantém no carrinho só os itens que continuam disponíveis.
+  cart = cart.filter((item) => {
+    const produto = atuais.get(item.id);
+
+    if (!produto) {
+      removidos.push(`${item.name} não está mais disponível`);
+      return false;
+    }
+
+    if (produto.preco !== item.price) {
+      alterados.push(`${produto.nome} agora custa ${money(produto.preco)}`);
+      item.price = produto.preco;
+    }
+
+    // Mantém nome e imagem iguais aos do cardápio.
+    item.name = produto.nome;
+    if (produto.imagem) item.image = produto.imagem;
+    return true;
+  });
+
+  // Nada mudou: não precisa salvar nem avisar.
+  if (!removidos.length && !alterados.length) return;
+
+  saveCart();
+  renderCart();
+  mostrarAvisoCarrinho(
+    `Atualizamos seu carrinho: ${[...removidos, ...alterados].join("; ")}.`
+  );
+}
+
+// ------------------------------------------------------------
+// ATUALIZAR PREÇOS DO CARDÁPIO NA TELA
+// ------------------------------------------------------------
+// Atualiza o preço exibido em cada card sem recarregar a página.
+// Se o produto ficou indisponível, o botão "Adicionar ao carrinho" é desativado;
+// se voltou a ficar disponível, o botão é reativado.
+function atualizarPrecosDoCardapio(produtos) {
+  const atuais = new Map(produtos.map((produto) => [produto._id, produto]));
+
+  document.querySelectorAll(".card[data-id]").forEach((card) => {
+    const produto = atuais.get(card.dataset.id);
+    const botao = card.querySelector(".add-to-cart");
+    // O preço é o primeiro parágrafo direto do card (criado pelo produtos.js).
+    const preco = card.querySelector(":scope > p");
+
+    if (!produto) {
+      if (botao) {
+        botao.disabled = true;
+        botao.textContent = "Indisponível no momento";
+      }
+      return;
+    }
+
+    card.dataset.price = produto.preco;
+    if (preco) preco.textContent = money(produto.preco);
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = "Adicionar ao carrinho";
+    }
+  });
+}
+
+// ------------------------------------------------------------
+// BUSCAR O CARDÁPIO ATUAL NO SERVIDOR
+// ------------------------------------------------------------
+// Consulta /api/produtos (dados atuais do Sanity) e atualiza
+// os preços na tela e o carrinho, sem recarregar a página.
+// É chamada ao abrir o carrinho e quando o cliente volta para a aba do site.
+let atualizandoCardapio = false;
+
+async function atualizarCardapioECarrinho() {
+  // Evita duas consultas ao mesmo tempo.
+  if (atualizandoCardapio) return;
+  atualizandoCardapio = true;
+
+  try {
+    const response = await fetch("/api/produtos", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) return;
+
+    const produtos = await response.json();
+    if (!Array.isArray(produtos)) return;
+
+    atualizarPrecosDoCardapio(produtos);
+    sincronizarCarrinho(produtos);
+  } catch {
+    // Sem conexão no momento: mantemos a tela como está.
+    // A conferência final no servidor (validar-pedido.js) continua protegendo o pedido.
+  } finally {
+    atualizandoCardapio = false;
+  }
+}
+
+// Quando o cliente volta para a aba do site, confere se algo mudou
+// (somente se houver itens no carrinho, para evitar consultas desnecessárias).
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && cart.length) atualizarCardapioECarrinho();
 });
 
 // ------------------------------------------------------------
