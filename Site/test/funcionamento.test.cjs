@@ -45,7 +45,7 @@ test('servidor recusa pedido pausado ou falha de consulta sem gravar arquivo', a
   vm.runInNewContext(fs.readFileSync(__dirname + '/../server.js', 'utf8'), {
     require: name => name === 'express' ? express : name === './funcionamento' ? {
       consultarFuncionamento: async () => { if (falhar) throw Error('offline'); return {aceitaPedidos: false, mensagem: 'Pausada'}; }
-    } : name === './ordenar-produtos' ? {ordenarProdutos: x => x} : name === 'fs/promises' ? {writeFile(){gravacoes++}} : require(name),
+    } : name === './ordenar-produtos' ? {ordenarProdutos: x => x} : name === './validar-pedido' ? require('../validar-pedido') : name === 'fs/promises' ? {writeFile(){gravacoes++}} : require(name),
     __dirname, process, console, URL, AbortSignal,
   });
   for (falhar of [false, true]) {

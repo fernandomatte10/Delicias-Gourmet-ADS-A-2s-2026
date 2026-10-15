@@ -22,6 +22,7 @@ const fs = require("fs/promises");
 const crypto = require("crypto");
 const {consultarFuncionamento} = require("./funcionamento");
 const {ordenarProdutos} = require("./ordenar-produtos");
+const {validarItens, mensagemRevisao, consultarProdutos} = require("./validar-pedido");
 
 // Cria a aplicação Express.
 const app = express();
@@ -112,9 +113,9 @@ async function readOrders() {
 //   createdAt: "..."
 // }
 //
-// IMPORTANTE: o total enviado pelo navegador NÃO é considerado
-// como fonte de verdade. O servidor recalcula o total usando
-// os produtos recebidos.
+// IMPORTANTE: o total, os nomes e os preços enviados pelo navegador
+// NÃO são considerados como fonte de verdade. O servidor busca cada
+// produto no Sanity (validar-pedido.js) e recalcula o total.
 app.post("/api/pedidos", async (req, res) => {
   try {
     const { customer, items, total, createdAt } = req.body || {};
@@ -133,25 +134,40 @@ app.post("/api/pedidos", async (req, res) => {
       return res.status(409).json({error: funcionamento.mensagem, funcionamento});
     }
 
-    // Limpa e limita os dados dos produtos antes de salvar.
-    const cleanItems = items
-      .map((item) => ({
-        name: String(item.name).slice(0, 120),
-        price: Number(item.price),
-        quantity: Number(item.quantity),
-        image: String(item.image || ""),
-      }))
-      .filter(
-        (item) =>
-          item.name &&
-          item.price >= 0 &&
-          item.quantity > 0 &&
-          item.quantity <= 99
-      );
-
-    if (!cleanItems.length) {
-      return res.status(400).json({ error: "Itens inválidos." });
+    // SEGURANÇA: confere no Sanity cada item do carrinho antes de gravar.
+    // O navegador informa só o id e a quantidade de cada produto;
+    // nome, preço e disponibilidade gravados são os oficiais do Sanity.
+    // A regra completa está explicada em validar-pedido.js.
+    let verificacao;
+    try {
+      // 1. Busca no Sanity os produtos que estão no carrinho (pelos ids).
+      const produtosSanity = await consultarProdutos(items.map((item) => item?.id));
+      // 2. Compara o carrinho com os dados oficiais.
+      verificacao = validarItens(items, produtosSanity);
+    } catch {
+      // Se o Sanity não responder, NÃO gravamos o pedido sem conferir.
+      // Status 503 = serviço temporariamente indisponível.
+      return res.status(503).json({ error: "Não foi possível confirmar os produtos do pedido. Tente novamente." });
     }
+
+    // Dados enviados inválidos (ex.: quantidade 0 ou acima de 99).
+    // Status 400 = requisição inválida.
+    if (verificacao.erro) {
+      return res.status(400).json({ error: verificacao.erro });
+    }
+
+    // Algum item está esgotado/excluído ou mudou de preço:
+    // nada é gravado e o carrinho.js atualiza o carrinho para o cliente revisar.
+    // Status 409 = conflito entre o carrinho e os dados atuais.
+    if (verificacao.indisponiveis.length || verificacao.alterados.length) {
+      return res.status(409).json({
+        error: mensagemRevisao(verificacao),
+        indisponiveis: verificacao.indisponiveis,
+        alterados: verificacao.alterados,
+      });
+    }
+    // Itens aprovados, já com nome e preço oficiais do Sanity.
+    const cleanItems = verificacao.validos;
 
     // Recalcula o valor total no servidor.
     const calculatedTotal = cleanItems.reduce(
