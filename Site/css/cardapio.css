@@ -556,3 +556,183 @@
     font-size: 10px;
   }
 }
+
+
+
+/* =========================================================
+   ADICIONAIS DO CARRINHO
+   ========================================================= */
+
+/* Área dos adicionais */
+.cart-addons {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+/* Botão que abre e fecha os adicionais */
+.cart-addons-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 26px 10px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-wine);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Seta: para baixo fechada e para cima aberta */
+.cart-addons-arrow {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  object-fit: contain;
+  flex-shrink: 0;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.cart-addons-arrow.aberto {
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+/* Lista de opções */
+.cart-addons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Esconde a lista quando fechada */
+.cart-addons-list[hidden] {
+  display: none !important;
+}
+
+/* Cada adicional */
+.cart-addon-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* Checkbox padrão escondido */
+.cart-addon-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+/* Bolinha de seleção */
+.cart-addon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  border: 2px solid var(--color-wine);
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+/* Bolinha preenchida quando selecionada */
+.cart-addon-checkbox:checked + .cart-addon-circle {
+  background: var(--color-wine);
+  box-shadow: inset 0 0 0 4px var(--color-beige);
+}
+
+/* Foco pelo teclado */
+.cart-addon-checkbox:focus-visible + .cart-addon-circle {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+/* Nome e preço dos adicionais */
+.cart-addon-name {
+  flex: 1;
+}
+
+.cart-addon-price {
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+/* Resumo dos adicionais escolhidos */
+.cart-selected-addons {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  color: var(--color-wine);
+}
+
+/* =========================================================
+   ALINHAMENTO DOS ITENS DO CARRINHO
+   ========================================================= */
+
+.cart-item {
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+/* Imagem do produto */
+.cart-item > img {
+  grid-column: 1;
+  grid-row: 1;
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 0;
+}
+
+/* Informações do produto e adicionais */
+.cart-item-details {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* Preço total à direita */
+.cart-item-total {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+/* Ajustes para telas pequenas */
+@media screen and (max-width: 420px) {
+  .cart-addons-toggle {
+    font-size: 13px;
+  }
+
+  .cart-addon-option {
+    font-size: 12px;
+  }
+}
+
+/* Mantém a seta pequena dentro do botão */
+.cart-item .cart-addons-arrow {
+  width: 18px;
+  height: 18px;
+}

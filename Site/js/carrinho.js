@@ -14,218 +14,327 @@
 // O Node.js fica responsável pelo backend e pelo registro do pedido.
 // ============================================================
 
-// Número do WhatsApp que receberá os pedidos.
-// Formato internacional: 55 + DDD + número, sem espaços ou símbolos.
+
 const WHATSAPP = "5544998860173";
-
-// Endpoint do backend Node.js que registra os pedidos.
 const API_URL = "/api/pedidos";
-
-// Nome usado pelo localStorage para guardar o carrinho.
 const CART_KEY = "delicias-gourmet-carrinho";
 
-// ------------------------------------------------------------
-// ESTADO DO CARRINHO
-// ------------------------------------------------------------
-// Primeiro tentamos recuperar um carrinho que já estava salvo.
-// Caso não exista, começamos com um array vazio.
+// Adicionais permitidos e seus preços oficiais.
+const ADICIONAIS = {
+  "Catupiry": 5,
+  "Cheddar": 5,
+  "Cream cheese": 5,
+  "Calabresa": 5,
+  "Bacon": 5,
+};
+
+// Recupera o carrinho salvo no navegador.
 let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 
-// Atalho para buscar elementos pelo ID.
+// Garante que itens antigos tenham uma lista de adicionais.
+cart.forEach((item) => {
+  if (!Array.isArray(item.adicionais)) item.adicionais = [];
+});
+
 const $ = (id) => document.getElementById(id);
 
-// Converte um número para o formato de moeda brasileiro.
-// Exemplo: 25.5 -> R$ 25,50
+// Formata valores como moeda brasileira.
 const money = (value) =>
-  value.toLocaleString("pt-BR", {
+  Number(value).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
 
-// ------------------------------------------------------------
-// FUNÇÕES DE CÁLCULO E PERSISTÊNCIA
-// ------------------------------------------------------------
+// Preço total dos adicionais de uma unidade.
+function totalAdicionais(item) {
+  return (item.adicionais || []).reduce(
+    (sum, nome) => sum + (ADICIONAIS[nome] || 0),
+    0
+  );
+}
 
-// Salva o estado atual do carrinho no navegador.
-// O localStorage permite manter os produtos mesmo se a página for atualizada.
+// Preço de uma unidade, incluindo os adicionais.
+function precoUnitario(item) {
+  return Number(item.price) + totalAdicionais(item);
+}
+
+// Identifica se o produto é um shawarma.
+function ehShawarma(item) {
+  return String(item.categoria || "").toLowerCase().includes("shawarma");
+}
+
+// Salva o carrinho no navegador.
 function saveCart() {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
-// Retorna a quantidade total de produtos no carrinho.
-// Exemplo: 2 hambúrgueres + 3 pastéis = 5 itens.
+// Quantidade total de unidades no carrinho.
 function totalItems() {
   return cart.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-// Calcula o valor total de todos os produtos.
+// Soma os preços dos produtos e seus adicionais.
 function totalCart() {
-  return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  return cart.reduce(
+    (sum, item) => sum + precoUnitario(item) * item.quantity,
+    0
+  );
+}
+
+// Evita que nomes de produtos sejam interpretados como HTML.
+function escapeCartText(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[char]));
 }
 
 // ------------------------------------------------------------
 // RENDERIZAÇÃO DO CARRINHO
 // ------------------------------------------------------------
-// Atualiza a interface sempre que alguma coisa muda no carrinho.
-function escapeCartText(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
-}
-
 function renderCart() {
   const container = $("cart-items");
   const empty = $("cart-empty");
   const total = $("cart-total");
   const count = $("cart-count");
-  const checkout = $("checkout-button");
   const clear = $("clear-cart");
 
-  // Atualiza contador e total.
   count.textContent = totalItems();
   total.textContent = money(totalCart());
 
-  // Desabilita os botões quando não há produtos.
   window.atualizarBotaoPedido();
   clear.disabled = cart.length === 0;
-
-  // Mostra a mensagem de carrinho vazio somente quando necessário.
   empty.hidden = cart.length !== 0;
 
-  // Monta visualmente cada produto do carrinho.
-  container.innerHTML = cart
-    .map(
-      (item, index) => `
-    <article class="cart-item">
-      <img src="${escapeCartText(item.image)}" alt="${escapeCartText(item.name)}" />
-      <div>
-        <h3>${escapeCartText(item.name)}</h3>
-        <div class="cart-item-price">${money(item.price)} cada</div>
+  container.innerHTML = cart.map((item, index) => {
+    const adicionais = item.adicionais || [];
+    const shawarma = ehShawarma(item);
+    const aberto = item.adicionaisAberto === true;
 
-        <div class="quantity-controls">
+    // Cria as opções de adicionais somente para shawarmas.
+    const opcoes = shawarma
+      ? Object.entries(ADICIONAIS).map(([nome, preco]) => `
+          <label class="cart-addon-option">
+            <input
+              type="checkbox"
+              class="cart-addon-checkbox"
+              data-index="${index}"
+              value="${escapeCartText(nome)}"
+              ${adicionais.includes(nome) ? "checked" : ""}
+            />
+            <span class="cart-addon-circle"></span>
+            <span class="cart-addon-name">${escapeCartText(nome)}</span>
+            <span class="cart-addon-price">+ ${money(preco)}</span>
+          </label>
+        `).join("")
+      : "";
+
+    return `
+      <article class="cart-item">
+        <img
+          src="${escapeCartText(item.image || "")}"
+          alt="${escapeCartText(item.name)}"
+        />
+
+        <div class="cart-item-details">
+          <h3>${escapeCartText(item.name)}</h3>
+
+          <div class="cart-item-price">
+            ${money(item.price)} cada
+          </div>
+
+          ${shawarma ? `
+            <button
+              type="button"
+              class="cart-addons-toggle"
+              data-action="toggle-addons"
+              data-index="${index}"
+              aria-expanded="${aberto}"
+            >
+              <span>Adicionais</span>
+              <img
+                src="img/seta.png"
+                alt=""
+                class="${aberto ? "cart-addons-arrow aberto" : "cart-addons-arrow"}"
+              />
+            </button>
+
+            <div class="cart-addons-list" ${aberto ? "" : "hidden"}>
+              ${opcoes}
+            </div>
+
+            ${adicionais.length ? `
+              <div class="cart-selected-addons">
+                Adicionais escolhidos:
+                ${adicionais.map(escapeCartText).join(", ")}
+                (+ ${money(totalAdicionais(item))})
+              </div>
+            ` : ""}
+          ` : ""}
+
+          <div class="quantity-controls">
+            <button
+              type="button"
+              data-action="decrease"
+              data-index="${index}"
+              aria-label="Diminuir"
+            >−</button>
+
+            <strong>${item.quantity}</strong>
+
+            <button
+              type="button"
+              data-action="increase"
+              data-index="${index}"
+              aria-label="Aumentar"
+            >+</button>
+          </div>
+
           <button
+            class="remove-item"
             type="button"
-            data-action="decrease"
+            data-action="remove"
             data-index="${index}"
-            aria-label="Diminuir"
-          >−</button>
-
-          <strong>${item.quantity}</strong>
-
-          <button
-            type="button"
-            data-action="increase"
-            data-index="${index}"
-            aria-label="Aumentar"
-          >+</button>
+          >Remover</button>
         </div>
 
-        <button
-          class="remove-item"
-          type="button"
-          data-action="remove"
-          data-index="${index}"
-        >
-          Remover
-        </button>
-      </div>
-
-      <div class="cart-item-total">
-        ${money(item.price * item.quantity)}
-      </div>
-    </article>`
-    )
-    .join("");
+        <div class="cart-item-total">
+          ${money(precoUnitario(item) * item.quantity)}
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 // ------------------------------------------------------------
 // ADICIONAR PRODUTO
 // ------------------------------------------------------------
-// Recebe o card do produto clicado e transforma as informações
-// do HTML em um item do carrinho.
 function addToCart(card) {
-  // Nome do produto.
   const name = card.querySelector("h3").textContent.trim();
 
-  // Preço exibido no cardápio.
-  // Exemplo: "R$ 25,90" vira o número 25.90.
-  const price = card.dataset.price !== undefined ? Number(card.dataset.price) : Number(
-    card
-      .querySelector("p")
-      .textContent.replace(/[^0-9,]/g, "")
-      .replace(",", ".")
-  );
+  const price = card.dataset.price !== undefined
+    ? Number(card.dataset.price)
+    : Number(
+        card.querySelector("p").textContent
+          .replace(/[^0-9,]/g, "")
+          .replace(",", ".")
+      );
 
-  // Caminho da imagem do produto.
   const image = card.querySelector("img").getAttribute("src");
-
-  // Verifica se o produto já está no carrinho.
   const id = card.dataset.id;
-  const found = cart.find((item) => id ? item.id === id : item.name === name);
+
+  // Descobre a categoria pelo título que fica antes da grade.
+  const grade = card.closest(".divsshawarma");
+  const categoria = grade?.previousElementSibling
+    ?.querySelector("h2")?.textContent.trim() || "";
+
+  // Shawarmas são separados para permitir adicionais diferentes.
+  // Os outros produtos continuam sendo agrupados como antes.
+  const found = categoria.toLowerCase().includes("shawarma")
+    ? undefined
+    : cart.find((item) =>
+        id ? item.id === id : item.name === name
+      );
 
   if (found) {
-    // Se já existe, apenas aumenta a quantidade.
     found.quantity += 1;
   } else {
-    // Se é um produto novo, adiciona com quantidade 1.
-    cart.push({ id, name, price, image, quantity: 1 });
+    cart.push({
+      id,
+      name,
+      price,
+      image,
+      categoria,
+      quantity: 1,
+      adicionais: [],
+      adicionaisAberto: false,
+    });
   }
 
-  // Salva e atualiza a tela.
   saveCart();
   renderCart();
-
   mostrarPopupCarrinho();
-
-  // O carrinho permanece fechado. O cliente pode abri-lo pelo botão do cabeçalho.
 }
 
 // ------------------------------------------------------------
-// CLIQUES DO CARRINHO
+// CLIQUES E SELEÇÃO DOS ADICIONAIS
 // ------------------------------------------------------------
-// Usamos um único listener no document para controlar os botões
-// criados dinamicamente dentro do carrinho.
 document.addEventListener("click", (event) => {
-  // Botão "Adicionar ao carrinho" do cardápio.
   const add = event.target.closest(".add-to-cart");
 
   if (add) {
     esconderAvisoCarrinho();
     addToCart(add.closest(".card"));
+    return;
   }
 
-  // Botões internos do carrinho: +, -, Remover.
   const action = event.target.closest("[data-action]");
+  if (!action) return;
 
-  if (action) {
-    esconderAvisoCarrinho();
-    const index = Number(action.dataset.index);
+  esconderAvisoCarrinho();
 
-    if (action.dataset.action === "increase") {
-      cart[index].quantity++;
-    }
+  const index = Number(action.dataset.index);
+  const item = cart[index];
 
-    if (action.dataset.action === "decrease") {
-      cart[index].quantity--;
-    }
+  if (!item) return;
 
-    // Remove o produto se o cliente clicar em Remover
-    // ou se a quantidade chegar a zero.
-    if (
-      action.dataset.action === "remove" ||
-      cart[index]?.quantity <= 0
-    ) {
-      cart.splice(index, 1);
-    }
-
-    saveCart();
-    renderCart();
+  if (action.dataset.action === "toggle-addons") {
+    item.adicionaisAberto = !item.adicionaisAberto;
   }
+
+  if (action.dataset.action === "increase") {
+    item.quantity++;
+  }
+
+  if (action.dataset.action === "decrease") {
+    item.quantity--;
+  }
+
+  if (
+    action.dataset.action === "remove" ||
+    item.quantity <= 0
+  ) {
+    cart.splice(index, 1);
+  }
+
+  saveCart();
+  renderCart();
+});
+
+// Trata a marcação e desmarcação dos adicionais.
+document.addEventListener("change", (event) => {
+  const checkbox = event.target.closest(".cart-addon-checkbox");
+  if (!checkbox) return;
+
+  const index = Number(checkbox.dataset.index);
+  const item = cart[index];
+
+  if (!item || !ehShawarma(item)) return;
+
+  const nome = checkbox.value;
+
+  if (checkbox.checked) {
+    if (!item.adicionais.includes(nome)) {
+      item.adicionais.push(nome);
+    }
+  } else {
+    item.adicionais = item.adicionais.filter(
+      (adicional) => adicional !== nome
+    );
+  }
+
+  esconderAvisoCarrinho();
+  saveCart();
+  renderCart();
 });
 
 // ------------------------------------------------------------
 // ABRIR E FECHAR O CARRINHO
 // ------------------------------------------------------------
 function openCart() {
-  // Sempre que o carrinho é aberto, conferimos preços e disponibilidade atuais.
   atualizarCardapioECarrinho();
   $("cart-drawer").setAttribute("aria-hidden", "false");
   $("cart-drawer").hidden = false;
@@ -240,16 +349,10 @@ function closeCart() {
   document.body.classList.remove("cart-open");
 }
 
-// Garante que o carrinho comece fechado ao carregar o site.
 closeCart();
 
-// Botão do carrinho no cabeçalho.
 $("cart-button").addEventListener("click", openCart);
-
-// Botão X para fechar o carrinho.
 $("cart-close").addEventListener("click", closeCart);
-
-// Também fecha quando o cliente clica no fundo escuro.
 $("cart-overlay").addEventListener("click", closeCart);
 
 // ------------------------------------------------------------
@@ -263,15 +366,11 @@ $("clear-cart").addEventListener("click", () => {
 });
 
 // ------------------------------------------------------------
-// FINALIZAÇÃO DO PEDIDO PELO WHATSAPP
+// FINALIZAR PEDIDO PELO WHATSAPP
 // ------------------------------------------------------------
-// A observação é preenchida diretamente no carrinho.
-// Ao clicar no botão, o pedido é registrado no Node.js e depois
-// o WhatsApp é aberto com todos os itens, quantidades, total e observação.
 $("checkout-button").addEventListener("click", async () => {
   if (!cart.length || window.pedidoEmEnvio || !window.estadoLoja.aceitaPedidos) return;
 
-  // Uma nova tentativa de finalizar apaga o aviso anterior.
   esconderAvisoCarrinho();
 
   const observations = $("order-observations").value.trim();
@@ -294,7 +393,6 @@ $("checkout-button").addEventListener("click", async () => {
   button.textContent = "Preparando pedido...";
 
   try {
-    // Registra o pedido no backend Node.js.
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -303,49 +401,64 @@ $("checkout-button").addEventListener("click", async () => {
 
     if (!response.ok) {
       const falha = await response.json().catch(() => ({}));
-      if (falha.funcionamento) window.aplicarEstadoLoja(falha.funcionamento);
-      else if (response.status === 503) window.aplicarEstadoLoja({aceitaPedidos: false, mensagem: falha.error || "Não foi possível confirmar o funcionamento da loja."});
-      // O servidor conferiu os itens no Sanity e algo mudou: atualiza o carrinho para o cliente revisar.
-      if (falha.indisponiveis || falha.alterados) atualizarCarrinhoComServidor(falha);
+
+      if (falha.funcionamento) {
+        window.aplicarEstadoLoja(falha.funcionamento);
+      } else if (response.status === 503) {
+        window.aplicarEstadoLoja({
+          aceitaPedidos: false,
+          mensagem: falha.error || "Não foi possível confirmar o funcionamento da loja.",
+        });
+      }
+
+      if (falha.indisponiveis || falha.alterados) {
+        atualizarCarrinhoComServidor(falha);
+      }
+
       throw new Error(falha.error || "Falha ao registrar pedido");
     }
 
     const saved = await response.json();
 
-    // Monta uma mensagem completa para o WhatsApp.
     const lines = [
       "*Novo pedido - Delícias Gourmet*",
       `Pedido: #${saved.id}`,
       "",
       "*Itens do pedido:*",
-      // Usa os itens e o total confirmados pelo servidor (dados oficiais do Sanity).
-      ...saved.items.map(
-        (item) =>
-          `${item.quantity}x ${item.name} — ${money(item.price * item.quantity)}`
-      ),
-      "",
-      `*Total: ${money(saved.total)}*`,
     ];
+
+    // Inclui cada produto e seus adicionais na mensagem.
+    for (const item of saved.items) {
+      lines.push(
+  `${item.quantity}x ${item.name} — ${money(
+    item.price * item.quantity
+  )}`
+);
+
+      for (const nome of item.adicionais || []) {
+        lines.push(`   + ${nome}: ${money(ADICIONAIS[nome] || 0)} por unidade`);
+      }
+    }
+
+    lines.push("", `*Total: ${money(saved.total)}*`);
 
     if (observations) {
       lines.push("", `*Observações:* ${observations}`);
     }
 
-    // Abre diretamente o WhatsApp com o pedido preenchido.
     const whatsappUrl =
       `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
 
-    window.location.href = whatsappUrl;
-
-    // Limpa o carrinho depois de preparar o pedido.
+    // Limpa o carrinho após o pedido ser registrado.
     cart = [];
     saveCart();
     $("order-observations").value = "";
     renderCart();
     closeCart();
+
+    window.location.href = whatsappUrl;
   } catch (error) {
     console.error("Erro ao finalizar pedido:", error);
-    // Mostra o motivo dentro do próprio carrinho (em vez do alert() do navegador).
     mostrarAvisoCarrinho(
       error.message || "Não foi possível registrar o pedido. Tente novamente."
     );
@@ -358,35 +471,33 @@ $("checkout-button").addEventListener("click", async () => {
 // ------------------------------------------------------------
 // ATUALIZAR CARRINHO COM A RESPOSTA DO SERVIDOR
 // ------------------------------------------------------------
-// Remove itens que não estão mais disponíveis e aplica os preços atuais do Sanity.
-// O cliente vê o carrinho corrigido e decide se finaliza novamente.
 function atualizarCarrinhoComServidor({ indisponiveis = [], alterados = [] }) {
   const removidos = new Set(indisponiveis.map((item) => item.id));
-  cart = cart.filter((item) => !removidos.has(typeof item.id === "string" ? item.id : null));
+
+  cart = cart.filter(
+    (item) => !removidos.has(typeof item.id === "string" ? item.id : null)
+  );
+
   for (const novo of alterados) {
-    const item = cart.find((i) => i.id === novo.id);
-    if (item) {
+    for (const item of cart.filter((i) => i.id === novo.id)) {
       item.price = novo.price;
       item.name = novo.name;
     }
   }
+
   saveCart();
   renderCart();
 }
 
 // ------------------------------------------------------------
-// AVISO DENTRO DO CARRINHO
+// AVISOS DO CARRINHO
 // ------------------------------------------------------------
-// Mostra uma mensagem no próprio carrinho (elemento #carrinho-aviso do index.html),
-// no lugar da janela alert() do navegador.
-// O aviso fica visível até o cliente mexer no carrinho ou tentar finalizar de novo.
 function mostrarAvisoCarrinho(mensagem) {
   const aviso = $("carrinho-aviso");
   aviso.textContent = mensagem;
   aviso.hidden = false;
 }
 
-// Esconde o aviso do carrinho.
 function esconderAvisoCarrinho() {
   const aviso = $("carrinho-aviso");
   aviso.hidden = true;
@@ -394,21 +505,13 @@ function esconderAvisoCarrinho() {
 }
 
 // ------------------------------------------------------------
-// SINCRONIZAR O CARRINHO COM O CARDÁPIO ATUAL
+// SINCRONIZAR COM O CARDÁPIO ATUAL
 // ------------------------------------------------------------
-// Recebe a lista de produtos disponíveis (a mesma da rota /api/produtos)
-// e compara com o carrinho salvo no navegador:
-//   - produto que não está mais na lista (esgotado/excluído) sai do carrinho;
-//   - produto com preço diferente recebe o preço atual.
-// Se algo mudar, o cliente vê um aviso dentro do carrinho.
-// Também é chamada pelo produtos.js quando o cardápio termina de carregar.
 function sincronizarCarrinho(produtos) {
-  // Map: id do produto -> dados atuais vindos do Sanity.
   const atuais = new Map(produtos.map((produto) => [produto._id, produto]));
   const removidos = [];
   const alterados = [];
 
-  // filter mantém no carrinho só os itens que continuam disponíveis.
   cart = cart.filter((item) => {
     const produto = atuais.get(item.id);
 
@@ -422,35 +525,41 @@ function sincronizarCarrinho(produtos) {
       item.price = produto.preco;
     }
 
-    // Mantém nome e imagem iguais aos do cardápio.
     item.name = produto.nome;
     if (produto.imagem) item.image = produto.imagem;
+
+    // Atualiza a categoria para manter a regra dos adicionais.
+    if (produto.categoria) {
+      item.categoria = produto.categoria;
+    }
+
+    // Remove adicionais caso o produto não seja mais um shawarma.
+    if (!ehShawarma(item)) {
+      item.adicionais = [];
+    }
+
     return true;
   });
 
-  // Nada mudou: não precisa salvar nem avisar.
   if (!removidos.length && !alterados.length) return;
 
   saveCart();
   renderCart();
+
   mostrarAvisoCarrinho(
     `Atualizamos seu carrinho: ${[...removidos, ...alterados].join("; ")}.`
   );
 }
 
 // ------------------------------------------------------------
-// ATUALIZAR PREÇOS DO CARDÁPIO NA TELA
+// ATUALIZAR PREÇOS DO CARDÁPIO
 // ------------------------------------------------------------
-// Atualiza o preço exibido em cada card sem recarregar a página.
-// Se o produto ficou indisponível, o botão "Adicionar ao carrinho" é desativado;
-// se voltou a ficar disponível, o botão é reativado.
 function atualizarPrecosDoCardapio(produtos) {
   const atuais = new Map(produtos.map((produto) => [produto._id, produto]));
 
   document.querySelectorAll(".card[data-id]").forEach((card) => {
     const produto = atuais.get(card.dataset.id);
     const botao = card.querySelector(".add-to-cart");
-    // O preço é o primeiro parágrafo direto do card (criado pelo produtos.js).
     const preco = card.querySelector(":scope > p");
 
     if (!produto) {
@@ -463,6 +572,7 @@ function atualizarPrecosDoCardapio(produtos) {
 
     card.dataset.price = produto.preco;
     if (preco) preco.textContent = money(produto.preco);
+
     if (botao) {
       botao.disabled = false;
       botao.textContent = "Adicionar ao carrinho";
@@ -473,13 +583,9 @@ function atualizarPrecosDoCardapio(produtos) {
 // ------------------------------------------------------------
 // BUSCAR O CARDÁPIO ATUAL NO SERVIDOR
 // ------------------------------------------------------------
-// Consulta /api/produtos (dados atuais do Sanity) e atualiza
-// os preços na tela e o carrinho, sem recarregar a página.
-// É chamada ao abrir o carrinho e quando o cliente volta para a aba do site.
 let atualizandoCardapio = false;
 
 async function atualizarCardapioECarrinho() {
-  // Evita duas consultas ao mesmo tempo.
   if (atualizandoCardapio) return;
   atualizandoCardapio = true;
 
@@ -488,6 +594,7 @@ async function atualizarCardapioECarrinho() {
       cache: "no-store",
       signal: AbortSignal.timeout(10000),
     });
+
     if (!response.ok) return;
 
     const produtos = await response.json();
@@ -496,38 +603,33 @@ async function atualizarCardapioECarrinho() {
     atualizarPrecosDoCardapio(produtos);
     sincronizarCarrinho(produtos);
   } catch {
-    // Sem conexão no momento: mantemos a tela como está.
-    // A conferência final no servidor (validar-pedido.js) continua protegendo o pedido.
+    // Sem conexão: mantém a tela atual.
+    // O servidor continuará validando os itens na finalização.
   } finally {
     atualizandoCardapio = false;
   }
 }
 
-// Quando o cliente volta para a aba do site, confere se algo mudou
-// (somente se houver itens no carrinho, para evitar consultas desnecessárias).
+// Confere o cardápio quando o cliente volta para a aba.
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && cart.length) atualizarCardapioECarrinho();
+  if (!document.hidden && cart.length) {
+    atualizarCardapioECarrinho();
+  }
 });
 
 // ------------------------------------------------------------
 // INICIALIZAÇÃO
 // ------------------------------------------------------------
-// Executa uma primeira renderização quando a página é carregada.
 renderCart();
-// Mostra uma mensagem quando o produto é adicionado ao carrinho
+
+// Mostra um aviso quando um produto é adicionado.
 function mostrarPopupCarrinho() {
+  const popup = document.getElementById("popup-carrinho");
+  if (!popup) return;
 
-    // Procura no HTML o elemento que possui o id "popup-carrinho"
-    const popup = document.getElementById("popup-carrinho");
+  popup.classList.add("mostrar");
 
-    // Adiciona a classe "mostrar", deixando o popup visível
-    popup.classList.add("mostrar");
-
-    // Espera 2 segundos antes de esconder novamente
-    setTimeout(function() {
-
-        // Remove a classe "mostrar"
-        popup.classList.remove("mostrar");
-
-    }, 2000);
+  setTimeout(() => {
+    popup.classList.remove("mostrar");
+  }, 2000);
 }

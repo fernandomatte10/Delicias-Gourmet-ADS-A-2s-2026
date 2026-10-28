@@ -170,10 +170,12 @@ app.post("/api/pedidos", async (req, res) => {
     const cleanItems = verificacao.validos;
 
     // Recalcula o valor total no servidor.
+    // Soma o produto e seus adicionais para cada unidade.
     const calculatedTotal = cleanItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+      (sum, item) => sum + (item.price + item.adicionaisTotal) * item.quantity,
+  0
+);
+
 
     // Cria o pedido que será salvo.
     // crypto.randomUUID() gera um identificador único para o pedido.
