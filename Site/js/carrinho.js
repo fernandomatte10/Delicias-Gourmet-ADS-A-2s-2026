@@ -428,10 +428,10 @@ $("checkout-button").addEventListener("click", async () => {
     ];
 
     // Inclui cada produto e seus adicionais na mensagem.
-    for (const item of saved.items) {
+      for (const item of saved.items) {
       lines.push(
-  `${item.quantity}x ${item.name} — ${money(
-    item.price * item.quantity
+     `${item.quantity}x ${item.name} — ${money(
+     item.price * item.quantity
   )}`
 );
 
